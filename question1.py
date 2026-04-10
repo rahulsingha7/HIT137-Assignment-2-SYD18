@@ -67,11 +67,13 @@ def decrypt_text(text, shift1, shift2):
 
 
 def read_file(filename):
-    pass
+    with open(filename, "r", encoding="utf-8") as file:
+        return file.read()
 
 
 def write_file(filename, content):
-    pass
+    with open(filename, "w", encoding="utf-8") as file:
+        file.write(content)
 
 
 def verify_files(original_file, decrypted_file):
