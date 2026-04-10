@@ -77,11 +77,33 @@ def write_file(filename, content):
 
 
 def verify_files(original_file, decrypted_file):
-    pass
+    original_text = read_file(original_file)
+    decrypted_text = read_file(decrypted_file)
+    return original_text == decrypted_text
 
 
 def main():
-    pass
+    try:
+        shift1 = int(input("Enter shift1: "))
+        shift2 = int(input("Enter shift2: "))
+
+        raw_text = read_file("raw_text.txt")
+
+        encrypted_text = encrypt_text(raw_text, shift1, shift2)
+        write_file("encrypted_text.txt", encrypted_text)
+
+        decrypted_text = decrypt_text(encrypted_text, shift1, shift2)
+        write_file("decrypted_text.txt", decrypted_text)
+
+        if verify_files("raw_text.txt", "decrypted_text.txt"):
+            print("Verification successful: decryption matches the original text.")
+        else:
+            print("Verification failed: decryption does not match the original text.")
+
+    except FileNotFoundError:
+        print("Error: raw_text.txt was not found.")
+    except ValueError:
+        print("Error: shift1 and shift2 must be integers.")
 
 
 if __name__ == "__main__":
