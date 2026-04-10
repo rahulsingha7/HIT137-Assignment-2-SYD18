@@ -169,13 +169,89 @@ def evaluate_tree(node):
     raise ValueError("Invalid tree")
 
 
+def format_tokens(tokens):
+    if tokens == "ERROR":
+        return "ERROR"
+
+    parts = []
+    for token_type, token_value in tokens:
+        if token_type == "END":
+            parts.append("[END]")
+        else:
+            parts.append(f"[{token_type}:{token_value}]")
+    return " ".join(parts)
+
+
+def format_result(value):
+    if value == "ERROR":
+        return "ERROR"
+
+    if value.is_integer():
+        return str(int(value))
+
+    return f"{value:.4f}"
+
+
 def evaluate_file(input_path: str) -> list[dict]:
-    return []
+    results = []
+
+    with open(input_path, "r", encoding="utf-8") as file:
+        lines = file.readlines()
+
+    output_lines = []
+
+    for line in lines:
+        expression = line.rstrip("\n")
+
+        try:
+            tokens = tokenize(expression)
+            if tokens == "ERROR":
+                raise ValueError("Tokenization error")
+
+            tokens = insert_implicit_multiplication(tokens)
+            tree = parse_expression(tokens)
+
+            tree_str = tree_to_string(tree)
+            token_str = format_tokens(tokens)
+
+            try:
+                result = evaluate_tree(tree)
+                result_str = format_result(result)
+                stored_result = result
+            except Exception:
+                result_str = "ERROR"
+                stored_result = "ERROR"
+
+            results.append({
+                "input": expression,
+                "tree": tree_str,
+                "tokens": token_str,
+                "result": stored_result
+            })
+
+        except Exception:
+            tree_str = "ERROR"
+            token_str = "ERROR"
+            result_str = "ERROR"
+
+            results.append({
+                "input": expression,
+                "tree": "ERROR",
+                "tokens": "ERROR",
+                "result": "ERROR"
+            })
+
+        output_lines.append(f"Input: {expression}")
+        output_lines.append(f"Tree: {tree_str}")
+        output_lines.append(f"Tokens: {token_str}")
+        output_lines.append(f"Result: {result_str}")
+        output_lines.append("")
+
+    with open("output.txt", "w", encoding="utf-8") as file:
+        file.write("\n".join(output_lines).rstrip() + "\n")
+
+    return results
 
 
 if __name__ == "__main__":
-    tokens = tokenize("-(3 + 4)")
-    tokens = insert_implicit_multiplication(tokens)
-    tree = parse_expression(tokens)
-    print(tree_to_string(tree))
-    print(evaluate_tree(tree))
+    evaluate_file("sample_input.txt")
