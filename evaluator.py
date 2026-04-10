@@ -132,12 +132,50 @@ def parse_expression(tokens):
     return tree
 
 
+def tree_to_string(node):
+    if isinstance(node, int):
+        return str(node)
+
+    if isinstance(node, tuple):
+        if node[0] == "neg":
+            return f"(neg {tree_to_string(node[1])})"
+        return f"({node[0]} {tree_to_string(node[1])} {tree_to_string(node[2])})"
+
+    return "ERROR"
+
+
+def evaluate_tree(node):
+    if isinstance(node, int):
+        return float(node)
+
+    if isinstance(node, tuple):
+        if node[0] == "neg":
+            return -evaluate_tree(node[1])
+
+        left = evaluate_tree(node[1])
+        right = evaluate_tree(node[2])
+
+        if node[0] == "+":
+            return left + right
+        if node[0] == "-":
+            return left - right
+        if node[0] == "*":
+            return left * right
+        if node[0] == "/":
+            if right == 0:
+                raise ZeroDivisionError("Division by zero")
+            return left / right
+
+    raise ValueError("Invalid tree")
+
+
 def evaluate_file(input_path: str) -> list[dict]:
     return []
 
 
 if __name__ == "__main__":
-    tokens = tokenize("2 + 3 * 4")
+    tokens = tokenize("-(3 + 4)")
     tokens = insert_implicit_multiplication(tokens)
-    print(tokens)
-    print(parse_expression(tokens))
+    tree = parse_expression(tokens)
+    print(tree_to_string(tree))
+    print(evaluate_tree(tree))
